@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { afterUpdate, onMount } from "svelte";
 	import Canvas from "./Canvas.svelte";
 	import type {Color } from './Color'
 	import  {rgba2hex , printColorCSS} from './Color'
@@ -7,23 +7,62 @@
 	let loading = true
 	onMount(()=>{
 		loading = false
+		try {
+			const state = JSON.parse(localStorage.getItem("state")) as {
+				hideControls,
+				blurValue,
+				defaultMultiplicator,
+				defaultHyperspeed,
+				hyperspeedSkipValue,
+				orbSize,
+				starCount,
+				renderOrbs,
+				color
+			}
+			state.hideControls!==undefined && (hideControls = state.hideControls)
+			state.blurValue!==undefined && (blurValue = state.blurValue)
+			state.defaultMultiplicator!==undefined && (defaultMultiplicator = state.defaultMultiplicator)
+			state.defaultHyperspeed!==undefined && (defaultHyperspeed = state.defaultHyperspeed)
+			state.hyperspeedSkipValue!==undefined && (hyperspeedSkipValue = state.hyperspeedSkipValue)
+			state.orbSize!==undefined && (orbSize = state.orbSize)
+			state.starCount!==undefined && (starCount = state.starCount)
+			state.renderOrbs!==undefined && (renderOrbs = state.renderOrbs)
+			state.color!==undefined && (color = state.color)
+		} catch 
+		(error) {
+			resetValues()
+		}
+		
+	})
+	afterUpdate(()=>{
+		localStorage.setItem("state",JSON.stringify({
+				hideControls,
+				blurValue,
+				defaultMultiplicator,
+				defaultHyperspeed,
+				hyperspeedSkipValue,
+				orbSize,
+				starCount,
+				renderOrbs,
+				color
+			}))
 	})
 	let hideControls = false
 	let blurValue=0
 	let defaultMultiplicator = 0.1
 	let defaultHyperspeed = 1
-	let hyperspeedSkipValue = 5
-	let orbSize = 1
+	let hyperspeedSkipValue = 2
+	let orbSize = 3
 	let starCount = 1000
-	let renderOrbs = true
+	let renderOrbs = false
 	let color : {
 		main:Color,
 		second:Color
 	} = { 
 		main : {
-		    r:106,
-            g:90,
-            b:205,
+		    r:233,
+            g:212,
+            b:96,
             a:1
         },
         second:{
@@ -33,14 +72,15 @@
             a:1
         }
 	}
+	
 	const resetValues = () => {
 		blurValue=0
 		defaultMultiplicator = 0.1
 		defaultHyperspeed = 1
-		hyperspeedSkipValue = 5
-		orbSize = 1
+		hyperspeedSkipValue = 2
+		orbSize = 3
 		starCount = 1000
-		renderOrbs = true
+		renderOrbs = false
 	}
 	//@ts-ignore
 	import Picker from 'svelte-picker';
@@ -143,20 +183,6 @@
 			orbSize = Number(e.currentTarget.value)}}
 			value={orbSize}
 			/>
-		</label>
-		<label class = "input-label">Star Count:
-			<input
-				type=range
-				min =500 max = 10000
-				on:change={(e)=>{
-				starCount = Number(e.currentTarget.value)}}
-				value={starCount}/>
-				<input
-				type=number
-				min =500 max = 10000
-				on:change={(e)=>{
-				starCount = Number(e.currentTarget.value)}}
-				value={starCount}/>
 		</label>		
 		<label class = "input-label">Blur Value:
 			<input
@@ -204,7 +230,7 @@
 	main {
 		text-align: center;
 		padding: 1em;
-		max-width: 240px;
+		max-width: 30rem;
 		margin: 0 auto;
 	}
 	h1 {
@@ -214,7 +240,7 @@
 		font-weight: 100;
 	}
 
-	@media (min-width: 640px) {
+	@media (max-width: 30rem) {
 		main {
 			max-width: none;
 		}
